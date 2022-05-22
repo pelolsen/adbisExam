@@ -7,8 +7,16 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pelolsen/adbiseExam.git"
+  },
   "author": "",
   "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pelolsen/adbiseExam/issues"
+  },
+  "homepage": "https://github.com/pelolsen/adbiseExam#readme",
   "dependencies": {
     "@pdftron/pdfnet-node": "^9.2.0-1",
     "@pdftron/pdfnet-node-samples": "^9.2.0-2",

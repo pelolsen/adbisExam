@@ -6,7 +6,7 @@ const methodOverride = require("method-override") //To override Post method with
 const path = require('path');
 const { PDFNet } = require('@pdftron/pdfnet-node')
 const fs = require('fs')
-const PDFTronLicense = require('./node_modules/@pdftron/pdfnet-node-samples/samples/LicenseKey/LicenseKey')
+const PDFTronLicense = require('./models/LicenseKey')
 const pdf2base64 = require('pdf-to-base64');
 
 app.use(session({
