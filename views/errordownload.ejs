@@ -10,7 +10,7 @@
     <div class="app-background">
         <div class="header">
             <div class="left">
-                <div class="home-button">
+                <div class="home-button" onclick="window.location.href='/home'">
                     <img src="../public/images/home-header.svg">
                 </div>
                 <div class="logo-challenge">
@@ -29,12 +29,18 @@
         <div class="rest-container">
             <div class="form-container">
                 <div class="pind"></div>
+                <input type="hidden" id="path" name="path" value="<%- path %>">
                 <h1>There was an error.</h1>
                 <h2>There has been an error uploading your form, please upload it manually</h2>
                 <div class="yesno-container">
                     <div class="upload-button-container">
                         <button class="upload-button" onclick="window.location.href='/home'">Home</button>
                     </div>
+                    <form action="/download" method="POST">
+                        <div class="upload-button-container">
+                            <button class="upload-button" type="submit">Download</button>
+                        </div>
+                    </form>
                 </div>
                     
             </div>

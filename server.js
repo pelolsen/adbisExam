@@ -200,7 +200,7 @@ app.post('/ciform', async function(req, res){
         const outputPath = inputPath + 'Output/';
         try {
             const inputFilename = 'CI2022.pdf';
-            const outputFilename = `${FirstName}-CI-${datenu}.pdf`;
+            const outputFilename = `${FirstName}-CI-${id}.pdf`;
     
             const doc = await PDFNet.PDFDoc.createFromFilePath(inputPath + inputFilename);
             doc.initSecurityHandler();
@@ -247,37 +247,29 @@ app.post('/ciform', async function(req, res){
     await PDFNet.runWithCleanup(main, PDFTronLicense.Key).catch(function(error){console.log('Error: ' + JSON.stringify(error));}).then(function(){return PDFNet.shutdown();});
     const postDoc = require('./models/postDocument')
     const tobase = async (id, name, auth) =>{
-        try{
-            pdf2base64(`./public/files/Output/${FirstName}-CI-${datenu}.pdf`)
-            .then(
-                (response) => {
-                    const data ={
-                        ClientId: id,
-                        File: {
-                          FileName: `${name}-CI`,
-                          MediaType: "application/pdf",
-                          Buffer: response
-                        }
+        pdf2base64(`./public/files/Output/${FirstName}-CI-${id}.pdf`)
+        .then(
+            (response) => {
+                const data ={
+                    ClientId: id,
+                    File: {
+                      FileName: `${name}-CI`,
+                      MediaType: "application/pdf",
+                      Buffer: response
                     }
-                    postDoc(data, auth)
                 }
-            ).catch(
-                (err) =>{
-                    console.log('there was a mistake');
-                    res.send('there was a problem')
-                    //console.log(err);
-                }
-            )
-        } catch {
-            console.log('nono');
-            res.send('there was a problem')
-        }
+                postDoc(data, auth)
+
+            }
+        )
     }
     try{
         await tobase(id, FirstName, auth);
         res.redirect('/formuploaded')
-    } catch{
-        res.redirect('/erroruploading')
+    } catch(err){
+        console.log('JATAK');
+        const filepath = `./public/files/Output/${FirstName}-CI-${id}.pdf`
+        res.redirect('/download?data=' + encodeURIComponent(JSON.stringify(filepath)))
     }
 /*
 //data til at gemme formen på session
@@ -295,10 +287,14 @@ const data = {
 app.get('/formuploaded', function (req,res){
     res.render('formuploaded.ejs')
 })
-app.get('/download', function(req, res){
-    const file = `${__dirname}/public/files/Output/TestForm.pdf`;
+app.get('/download', function (req,res){
+    const path = req.query.data
+    res.render('errordownload.ejs', {path: path})
+})
+app.post('/download', function(req, res){
+    const path = req.body.path
+    const file = path;
     res.download(file); // Set disposition and send it.
-    res.render('errordownload.ejs')
   });
 /*
 app.post('/uploadpdf', async function(req, res){
