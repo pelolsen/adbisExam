@@ -23,7 +23,7 @@ app.use(express.static(path.join(__dirname, 'static')));
 app.use(methodOverride('_method'))
 
 // http://localhost:3000/
-app.get('/', function(req, res) {
+app.get('/', checkNotAuthenticated, function(req, res) {
 	// Render login template
 	//response.sendFile(path.join(__dirname + '/login.html'));
     res.render('login.ejs')
@@ -81,7 +81,7 @@ app.post('/auth', function(request, response) {
 });
 */
 // http://localhost:3000/home
-app.get('/home', function(req, res) {
+app.get('/home', checkAuthenticated, function(req, res) {
 	// If the user is loggedin
 	if (req.session.loggedin) {
 		// Output username
@@ -94,7 +94,7 @@ app.get('/home', function(req, res) {
 	res.end();
 });
 
-app.delete('/logout', async (req,res) => {
+app.delete('/logout', checkAuthenticated, async (req,res) => {
     req.session.destroy(err => {
         if (err) {
           res.status(400).send('Unable to log out')
@@ -104,7 +104,7 @@ app.delete('/logout', async (req,res) => {
       });
 })
 
-app.get('/searchclientci', function(req, res) {
+app.get('/searchclientci', checkAuthenticated, function(req, res) {
     	// If the user is loggedin
 	if (req.session.loggedin) {
 		// Output username
@@ -117,7 +117,7 @@ app.get('/searchclientci', function(req, res) {
 	res.end();
 });
 const getClient = require('./models/getClient')
-app.post('/clientsearchCI', async function(req, res) {
+app.post('/clientsearchCI', checkAuthenticated, async function(req, res) {
     // If the user is loggedin
 if (req.session.loggedin) {
     const salesa = req.session.username
@@ -146,7 +146,7 @@ if (req.session.loggedin) {
 res.end();
 });
 
-app.get('/ciform', function(req,res){
+app.get('/ciform', checkAuthenticated, function(req,res){
     const clientdata = JSON.parse(req.query.data)
     const sa = req.session.username
     const firstname = clientdata.firstname
@@ -160,7 +160,7 @@ app.get('/ciform', function(req,res){
     res.render('ciform.ejs', {id: id, firstname: firstname, lastname: lastname, gender: gender, phone: phone, birthday:birthday, email:email, sa: sa})
 })
 
-app.post('/ciform', async function(req, res){
+app.post('/ciform', checkAuthenticated, async function(req, res){
     const auth = req.session.authkey
     const id = req.body.id
     const FirstName= req.body.FirstName
@@ -284,18 +284,133 @@ const data = {
 */
 }) 
 
-app.get('/formuploaded', function (req,res){
+app.get('/formuploaded', checkAuthenticated, function (req,res){
     res.render('formuploaded.ejs')
 })
-app.get('/download', function (req,res){
+app.get('/download', checkAuthenticated, function (req,res){
     const path = req.query.data
     res.render('errordownload.ejs', {path: path})
 })
-app.post('/download', function(req, res){
+app.post('/download', checkAuthenticated, function(req, res){
     const path = req.body.path
     const file = path;
     res.download(file); // Set disposition and send it.
-  });
+});
+
+app.get('/searchclientMA', checkAuthenticated, function(req, res) {
+    // If the user is loggedin
+if (req.session.loggedin) {
+    // Output username
+    res.render('clientsearchMA.ejs', {name: req.session.username})
+    //response.send('Welcome back, ' + request.session.username + '! ' + 'Your Access Token is: ' + request.session.authkey);
+} else {
+    // Not logged in
+    res.send('Please login to view this page!');
+}
+res.end();
+});
+app.post('/clientsearchMA', checkAuthenticated, async function(req, res) {
+// If the user is loggedin
+if (req.session.loggedin) {
+const salesa = req.session.username
+const auth = req.session.authkey
+console.log(auth);
+const email = req.body.clientid
+const data = await getClient(email,auth)
+const client = data.data
+if (data.check == "true") {
+    for (const key in client){
+        if(client[key]== null){
+            client[key] = "";
+        }
+    }
+    
+    res.redirect('/maform?data=' + encodeURIComponent(JSON.stringify(client)));
+} else {
+    res.send('Incorrect Username and/or Password!');
+}
+
+//response.send('Welcome back, ' + request.session.username + '! ' + 'Your Access Token is: ' + request.session.authkey);
+} else {
+// Not logged in
+res.send('Please login to view this page!');
+}
+res.end();
+});
+
+app.get('/maform', checkAuthenticated, function (req,res){
+    const clientdata = JSON.parse(req.query.data)
+    const sa = req.session.username
+    const firstname = clientdata.firstname 
+    const lastname = clientdata.lastname
+    const phone = clientdata.phone
+    const email = clientdata.email
+    const id =clientdata.id
+    res.render('maform.ejs', {sa: sa, firstname: firstname, lastname: lastname,phone:phone, email:email, id:id})
+})
+
+
+app.get('/searchclientKlippe', checkAuthenticated, function(req, res) {
+    // If the user is loggedin
+if (req.session.loggedin) {
+    // Output username
+    res.render('clientsearchKlippe.ejs', {name: req.session.username})
+    //response.send('Welcome back, ' + request.session.username + '! ' + 'Your Access Token is: ' + request.session.authkey);
+} else {
+    // Not logged in
+    res.send('Please login to view this page!');
+}
+res.end();
+});
+app.post('/clientsearchKlippe', checkAuthenticated, async function(req, res) {
+// If the user is loggedin
+if (req.session.loggedin) {
+const salesa = req.session.username
+const auth = req.session.authkey
+console.log(auth);
+const email = req.body.clientid
+const data = await getClient(email,auth)
+const client = data.data
+if (data.check == "true") {
+    for (const key in client){
+        if(client[key]== null){
+            client[key] = "";
+        }
+    }
+    
+    res.redirect('/klippeform?data=' + encodeURIComponent(JSON.stringify(client)));
+} else {
+    res.send('Incorrect Username and/or Password!');
+}
+
+//response.send('Welcome back, ' + request.session.username + '! ' + 'Your Access Token is: ' + request.session.authkey);
+} else {
+// Not logged in
+res.send('Please login to view this page!');
+}
+res.end();
+});
+
+app.get('/klippeform', checkAuthenticated, function (req,res){
+    const clientdata = JSON.parse(req.query.data)
+    const sa = req.session.username
+    const firstname = clientdata.firstname 
+    const lastname = clientdata.lastname
+    const phone = clientdata.phone
+    const email = clientdata.email
+    const id =clientdata.id
+    res.render('klippeform.ejs', {sa: sa, firstname: firstname, lastname: lastname,phone:phone, email:email, id:id})
+})
+/*
+app.post('/klippeform', checkAuthenticated, function (req,res){
+    const canvas = req.body.signature_pad
+
+    console.log(canvas);
+
+    res.end
+
+})
+*/
 /*
 app.post('/uploadpdf', async function(req, res){
     const postDoc = require('./models/postDocument')
@@ -322,6 +437,20 @@ app.post('/uploadpdf', async function(req, res){
     )
 })
 */
+
+function checkAuthenticated(req, res, next){
+    if (req.session.loggedin) {
+        return next()
+    }
+    res.redirect('/')
+}
+
+function checkNotAuthenticated(req, res, next) {
+    if (req.session.loggedin) {
+        return res.redirect('/home')
+    }
+    next()
+}
 
 app.listen(80);
 
